@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Readers</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href={% static 'style.css' %}>
+</head>
+<body class="bg-dark">
+    <!-- Navigation -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            
+            <a class="navbar-brand" href={%url 'home'%}><i class="fa-sharp fa-solid fa-book-open me-3 fa-2x"></i>Library Management</a>
+            <ul class="nav nav-underline">
+                <li class="nav-item me-2">
+                    <a class="nav-link text-light" aria-current="page" href={%url 'home'%}><i class="fa-solid fa-house me-2"></i>Home</a>
+                </li>
+                <li class="nav-item me-2">
+                    <a class="nav-link active text-light" href={%url 'readers'%}><i class="fa-solid fa-book-open-reader fa-bounce me-2"></i>Reader</a>
+                </li>
+                <li class="nav-item me-2">
+                    <a class="nav-link text-light" href={%url 'books'%}><i class="fa-solid fa-book me-2"></i>Books</a>
+                </li>
+                <li class="nav-item me-2">
+                    <a class="nav-link text-light" href={%url 'bag'%}><i class="fa-solid fa-bag-shopping me-2"></i>Bag</a>
+                </li>
+                <li class="nav-item me-2">
+                    <a class="nav-link text-light" href={%url 'return_book_page'%}><i class="fa-solid fa-solid fa-rotate-left me-2"></i>Returned</a>
+                </li>
+            </ul>
+        </div>
+    </nav> <hr class="border border-light border-4 opacity-50">
+
+    <div class="container mt-4 text-light">
+        <h2>Readers</h2>
+
+        <!-- Add Reader Form -->
+        <div class="row">
+            <div class="col-md-4">
+                <h4>Add Reader</h4>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-2">
+                        <label>Name:</label>
+                        <input type="text" class="form-control" name="name" placeholder="Joseph" required>
+                    </div>
+                    <div class="mb-2">
+                        <label>Email:</label>
+                        <input type="email" class="form-control" name="email" placeholder="abcd@gmail.com" required>
+                    </div>
+                    <div class="mb-2">
+                        <label>Mobile:</label>
+                        <input type="text" class="form-control" name="mobile" placeholder="5656789652" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Reader</button>
+                </form>
+            </div>
+
+            <!-- Display Readers -->
+            <div class="col-md-8">
+                <h4>Readers List</h4>
+                <input type="text" id="search" class="form-control mb-2" placeholder="Search by name">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="readerTable">
+                        {% for reader in readers %}
+                        <tr>
+                            <td>{{ reader.name }}</td>
+                            <td>{{ reader.email }}</td>
+                            <td>{{ reader.mobile }}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ reader.id }}">Edit</button>
+                            </td>
+                        </tr>
+
+                        <!-- Edit Modal -->
+                        <div class="modal fade" id="editModal{{ reader.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title text-dark">Edit Reader</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="POST" action="{% url 'edit_reader' reader.id %}">
+                                            {% csrf_token %}
+                                            <div class="mb-2">
+                                                <label class="text-dark">Name:</label>
+                                                <input type="text" class="form-control" name="name" value="{{ reader.name }}" required>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="text-dark">Email:</label>
+                                                <input type="email" class="form-control" name="email" value="{{ reader.email }}" required>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="text-dark">Mobile:</label>
+                                                <input type="text" class="form-control" name="mobile" value="{{ reader.mobile }}" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & Search Script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById("search").addEventListener("keyup", function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll("#readerTable tr");
+            rows.forEach(row => {
+                let name = row.cells[0].innerText.toLowerCase();
+                row.style.display = name.includes(filter) ? "" : "none";
+            });
+        });
+    </script>
+</body>
+</html>
